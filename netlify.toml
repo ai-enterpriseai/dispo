@@ -1,0 +1,17 @@
+[build]
+  base = "src/front/"
+  publish = "src/front/dist"
+  command = "npm ci --legacy-peer-deps && npm run build"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[dev]
+  framework = "#static"
+  targetPort = 5173
+  publish = "src/front/dist" 

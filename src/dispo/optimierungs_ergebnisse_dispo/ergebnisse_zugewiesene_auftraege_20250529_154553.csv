@@ -1,0 +1,7 @@
+lkw_id,auftrag_id,anfahrt_dist_km,transport_dist_km,gesamtdistanz_fuer_auftrag_km,ladebeginn_h,ladeende_h,entladung_ende_h,auftrag_prio_original,auftrag_prio_gewicht,auftrag_gewicht_kg,lkw_kapazitaet_kg,lkw_verfuegbar_bis_h
+LKW3,AUF14,242.14,225.63,467.77,13.91,14.68,18.780375,1,3,4200,10000,19.24
+LKW5,AUF7,62.56,234.14,296.7,9.44,10.18,14.17675,1,3,7500,11000,16.72
+LKW7,AUF11,102.69,256.58,359.27,9.433625000000001,10.363625,14.490875,1,3,11500,12000,18.97
+LKW9,AUF10,45.14,352.1,397.24,8.43,9.17,14.741249999999999,1,3,2900,15000,16.58
+LKW8,AUF2,252.15,364.25,616.4,11.93,12.83,18.793125,2,2,5600,15000,20.18
+LKW10,AUF5,57.56,268.94,326.5,10.61,11.559999999999999,16.37175,3,1,8600,17000,17.05
