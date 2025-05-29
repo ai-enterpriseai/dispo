@@ -40,15 +40,21 @@ def get_latest_results():
     results_dir = os.path.join(current_dir, "..", "dispo", "optimierungs_ergebnisse_dispo")
     results_dir = os.path.abspath(results_dir)
     
-    print(f"Looking for results in: {results_dir}")
+    print(f"DEBUG get_latest_results: Looking for results in: {results_dir}") # DEBUG
     
     if not os.path.exists(results_dir):
-        print(f"Results directory does not exist: {results_dir}")
+        print(f"DEBUG get_latest_results: Results directory does not exist: {results_dir}") # DEBUG
         return None
     
     # Find the latest timestamp files
-    files = os.listdir(results_dir)
-    print(f"Found files: {files}")
+    files = []
+    try:
+        files = os.listdir(results_dir)
+    except OSError as e:
+        print(f"DEBUG get_latest_results: Error listing results_dir '{results_dir}': {e}") # DEBUG
+        return None
+        
+    print(f"DEBUG get_latest_results: Found files in '{results_dir}': {files}") # DEBUG
     timestamps = set()
     
     for file in files:
@@ -59,11 +65,11 @@ def get_latest_results():
                 timestamps.add(timestamp)
     
     if not timestamps:
-        print("No timestamp files found")
+        print(f"DEBUG get_latest_results: No timestamp files found in {results_dir} among files: {files}") # DEBUG
         return None
     
     latest_timestamp = max(timestamps)
-    print(f"Using latest timestamp: {latest_timestamp}")
+    print(f"DEBUG get_latest_results: Using latest timestamp: {latest_timestamp}") # DEBUG
     
     # Read all result files for the latest timestamp
     results = {}
@@ -74,7 +80,7 @@ def get_latest_results():
         assigned_path = os.path.join(results_dir, assigned_file)
         print(f"Looking for assigned orders file: {assigned_path}")
         if os.path.exists(assigned_path):
-            with open(assigned_path, 'r', encoding='cp1252') as f:
+            with open(assigned_path, 'r', encoding='utf-8') as f:
                 results['assigned_orders'] = parse_csv_to_dict(f.read())
                 print(f"Loaded {len(results['assigned_orders'])} assigned orders")
         
@@ -82,7 +88,7 @@ def get_latest_results():
         unassigned_file = f"ergebnisse_nicht_zugewiesene_auftraege_{latest_timestamp}.csv"
         unassigned_path = os.path.join(results_dir, unassigned_file)
         if os.path.exists(unassigned_path):
-            with open(unassigned_path, 'r', encoding='cp1252') as f:
+            with open(unassigned_path, 'r', encoding='utf-8') as f:
                 results['unassigned_orders'] = parse_csv_to_dict(f.read())
                 print(f"Loaded {len(results['unassigned_orders'])} unassigned orders")
         
@@ -90,7 +96,7 @@ def get_latest_results():
         truck_util_file = f"ergebnisse_lkw_auslastung_{latest_timestamp}.csv"
         truck_util_path = os.path.join(results_dir, truck_util_file)
         if os.path.exists(truck_util_path):
-            with open(truck_util_path, 'r', encoding='cp1252') as f:
+            with open(truck_util_path, 'r', encoding='utf-8') as f:
                 results['truck_utilization'] = parse_csv_to_dict(f.read())
                 print(f"Loaded {len(results['truck_utilization'])} truck utilization records")
         
@@ -98,34 +104,37 @@ def get_latest_results():
         raw_trucks_file = f"rohdaten_lkw_{latest_timestamp}.csv"
         raw_trucks_path = os.path.join(results_dir, raw_trucks_file)
         if os.path.exists(raw_trucks_path):
-            with open(raw_trucks_path, 'r', encoding='cp1252') as f:
+            with open(raw_trucks_path, 'r', encoding='utf-8') as f:
                 results['raw_trucks'] = parse_csv_to_dict(f.read())
                 print(f"Loaded {len(results['raw_trucks'])} trucks")
         
         raw_orders_file = f"rohdaten_auftraege_{latest_timestamp}.csv"
         raw_orders_path = os.path.join(results_dir, raw_orders_file)
         if os.path.exists(raw_orders_path):
-            with open(raw_orders_path, 'r', encoding='cp1252') as f:
+            with open(raw_orders_path, 'r', encoding='utf-8') as f:
                 results['raw_orders'] = parse_csv_to_dict(f.read())
                 print(f"Loaded {len(results['raw_orders'])} orders")
         
         return results
         
     except Exception as e:
-        print(f"Error reading results: {e}")
+        print(f"DEBUG get_latest_results: Error reading result CSV files: {e}") # DEBUG
         import traceback
-        traceback.print_exc()
+        traceback.print_exc() # Print full traceback
         return None
 
 def parse_location_tuple(location_str):
     """Parse location string like '(27.5, 22.32)' into lat, lng"""
+    print(f"DEBUG: parse_location_tuple received: '{location_str}'") # DEBUG
     try:
         # Remove parentheses and split by comma
         coords = location_str.strip('()').split(',')
         lat = float(coords[0].strip())
         lng = float(coords[1].strip())
+        print(f"DEBUG: parse_location_tuple parsed to: ({lat}, {lng})") # DEBUG
         return lat, lng
-    except:
+    except Exception as e: # DEBUG: Catch specific exception and print it
+        print(f"DEBUG: parse_location_tuple ERROR: {e} for input '{location_str}'") # DEBUG
         return 0.0, 0.0
 
 def convert_backend_to_frontend_format(backend_results):
@@ -375,6 +384,7 @@ def latest_results():
 
 @app.route('/api/generate-data', methods=['POST'])
 def generate_data():
+    print("--- DEBUG: /api/generate-data endpoint hit ---")
     """Generate raw unassigned truck and order data without optimization"""
     try:
         # Run the backend script with a special flag to only generate data
